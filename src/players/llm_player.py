@@ -1,11 +1,11 @@
-import os
 from collections import defaultdict
-from typing import override
+from typing import Self, override
 
 from openai import OpenAI
 from pydantic import BaseModel
 
 from board import Board, Move, PlayerKind, Pos
+from config import Config, ModelConfig
 
 from .base_player import BasePlayer
 
@@ -16,14 +16,21 @@ class Decision(BaseModel):
 
 
 class LLMPlayer(BasePlayer):
-    def __init__(self, model: str, *, timeout: float = 120.0):
+    def __init__(self, model_cfg: ModelConfig, *, timeout: float = 120.0):
+        self.model_cfg = model_cfg
         super().__init__()
-        self.model: str = model
         self.client: OpenAI = OpenAI(
-            base_url=os.getenv("PBAD_LLM_BASE_URL") or "http://localhost:11434",
-            api_key=os.getenv("PBAD_LLM_API_KEY"),
+            base_url=model_cfg.base_url,
+            api_key=model_cfg.api_key,
         )
         self.timeout: float = timeout
+
+    @classmethod
+    def load(cls, name: str, file: str = "config.json") -> Self:
+        config = Config.load(file)
+        if not (model_cfg := config.get(name)):
+            raise ValueError(f"No such key {name} in {file}")
+        return cls(model_cfg)
 
     @override
     def get_move(self, board: Board) -> Move:
@@ -97,14 +104,14 @@ BOARD:
         """
 
         response = self.client.chat.completions.create(
-            model=self.model,
+            model=self.model_cfg.name,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.1,
+            temperature=self.model_cfg.temperature,
             response_format={"type": "json_object"},
-            timeout=self.timeout,
+            timeout=self.model_cfg.timeout,
         )
         if not (raw_content := response.choices[0].message.content):
             raise ValueError(f"{self.model} returned an invalid message shape")

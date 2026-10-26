@@ -1,16 +1,11 @@
-import os
-
-from dotenv import load_dotenv
-
 from board import Board, Move, PlayerKind
 from players import LLMPlayer, RandomPlayer
 from ui import UI
 
 
 def main():
-    _ = load_dotenv()
-    fox = LLMPlayer(os.getenv("PBAD_LLM_NAME") or "ingloryon/k2-horizon:7b")
-    hounds = RandomPlayer()
+    fox = LLMPlayer.load("ChatGPT")
+    hounds = LLMPlayer.load("ChatGPT")
     board = Board(8)
     history: list[tuple[PlayerKind, Move, str | None]] = []
 
