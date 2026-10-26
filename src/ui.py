@@ -25,7 +25,7 @@ class UI:
     ):
         return self._live.__exit__(exc_type, exc_val, exc_tb)
 
-    def update(self, board: Board):
+    def update(self, board: Board, comment: str | None = None):
         header = "  " + "".join([f" {c} " for c in range(board.size)])
         lines: list[str] = [header]
         for r in range(board.edge, -1, -1):
@@ -48,6 +48,7 @@ class UI:
             + f"Fox: {board.fox_pos}\n"
             + f"Hounds: {board.hounds_pos}\n"
             + (f"Winner: {winner.name}\n" if (winner := board.get_winner()) else "")
+            + (f"{comment}\n" if comment else "")
         )
         info_panel = Panel(info_text, title="Info", width=48, box=box.SIMPLE)
 

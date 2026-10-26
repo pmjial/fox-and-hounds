@@ -3,7 +3,7 @@ from enum import Enum
 
 class PlayerKind(Enum):
     Fox = 0
-    Hound = 1
+    Hounds = 1
 
 
 Pos = tuple[int, int]
@@ -54,7 +54,7 @@ class Board:
                     if self._is_legal_pos(mpos) and self._is_free_pos(mpos):
                         moves.append(Move(((x, y), mpos)))
 
-            case PlayerKind.Hound:
+            case PlayerKind.Hounds:
                 for x, y in self.hounds_pos:
                     for mx in [-1, 1]:
                         mpos = (x + mx, y - 1)
@@ -69,7 +69,7 @@ class Board:
 
         if self.current_turn == PlayerKind.Fox:
             self.fox_pos = move[1]
-            self.current_turn = PlayerKind.Hound
+            self.current_turn = PlayerKind.Hounds
         else:
             i = self.hounds_pos.index(move[0])
             self.hounds_pos[i] = move[1]
@@ -87,3 +87,18 @@ class Board:
         copy.current_turn = self.current_turn
         copy.turn_count = self.turn_count
         return copy
+
+    def to_ascii(self) -> str:
+        sb = " " + "".join([f" {c} " for c in range(self.size)])
+        for r in range(self.edge, -1, -1):
+            row: str = str(r)
+            for c in range(self.size):
+                if (c, r) == self.fox_pos:
+                    row += " F "
+                elif (c, r) in self.hounds_pos:
+                    row += " H "
+                else:
+                    row += " . "
+            sb += "\n" + row
+
+        return sb

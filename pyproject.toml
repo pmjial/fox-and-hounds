@@ -3,6 +3,8 @@ name = "fox-and-hounds"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
+    "openai>=3.37.0",
     "pydantic>=2.14.1",
+    "python-dotenv>=1.2.4",
     "rich>=15.0.0",
 ]
