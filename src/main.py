@@ -4,8 +4,10 @@ from ui import UI
 
 
 def main():
-    fox = LLMPlayer.load("ChatGPT")
-    hounds = LLMPlayer.load("ChatGPT")
+    # fox = LLMPlayer.load("ChatGPT")
+    # hounds = LLMPlayer.load("ChatGPT")
+    fox = RandomPlayer()
+    hounds = RandomPlayer()
     board = Board(8)
     history: list[tuple[PlayerKind, Move, str | None]] = []
 
