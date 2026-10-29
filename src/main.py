@@ -1,13 +1,14 @@
 from board import Board, Move, PlayerKind
-from players import LLMPlayer, RandomPlayer
+from players import LLMPlayer, MinimaxPlayer, RandomPlayer
 from ui import UI
 
 
 def main():
     # fox = LLMPlayer.load("ChatGPT")
     # hounds = LLMPlayer.load("ChatGPT")
-    fox = RandomPlayer()
-    hounds = RandomPlayer()
+    # MinimaxPlayer(depth=4, heuristics=[Heuristic.ADVANCEMENT, ...]) selects heuristics
+    fox = MinimaxPlayer(depth=4)
+    hounds = MinimaxPlayer(depth=4)
     board = Board(8)
     history: list[tuple[PlayerKind, Move, str | None]] = []
 
