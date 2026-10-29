@@ -22,9 +22,8 @@ def main():
             if board.make_move(move):
                 comment = ""
                 for last_turn, (move_from, move_to), analysis in history[-2:]:
-                    comment += (
-                        f"\n[bold]Last {last_turn.name} move[/]: {move_from} -> {move_to}\n"
-                        + (f"{analysis}\n" if analysis else "")
+                    comment += f"\n[bold]Last {last_turn.name} move[/]: {move_from} -> {move_to}\n" + (
+                        f"{analysis}\n" if analysis else ""
                     )
                 ui.update(board, comment=comment)
 

@@ -7,3 +7,6 @@ dependencies = [
     "pydantic>=2.14.1",
     "rich>=15.0.0",
 ]
+
+[tool.ruff]
+line-length = 120

@@ -18,24 +18,26 @@ are the MIN player, regardless of which side this player controls.
 from collections.abc import Collection
 from enum import Enum
 from math import inf
-from typing import override
 from time import sleep
+from typing import override
 
 from board import Board, Move, PlayerKind
 
 from .base_player import BasePlayer
 
 # Tunable weights
-WIN_SCORE = 10_000 # win/loss score, must be greater than any sum of heuristics
+WIN_SCORE = 10_000  # win/loss score, must be greater than any sum of heuristics
 # Fox
-ADVANCEMENT_WEIGHT = 5 # Points per row the fox has advanced (counting from row 0 where he starts by default)
-MOBILITY_WEIGHT = 3 # Points per available move (more room to maneuver is preferred)
-LAST_MOVE_PENALTY = 15 # Subtracted when fox has only one move left (close to being trapped)
+ADVANCEMENT_WEIGHT = 5  # Points per row the fox has advanced (counting from row 0 where he starts by default)
+MOBILITY_WEIGHT = 3  # Points per available move (more room to maneuver is preferred)
+LAST_MOVE_PENALTY = 15  # Subtracted when fox has only one move left (close to being trapped)
 # Hounds
-DISTANCE_WEIGHT = 1 # Weight of summed Manhattan distance between hounds and fox (the closer the better)
-LINE_BONUS = 5 # Bonus for each pair of hounds neighboring themselves (keeping close formation is preferred)
-STRAGGLER_PENALTY = 100 # Massive penalty for when ahound is too far from the others (MIN_STRAGGLER_GAP rows or more behind the rest)
-MIN_STRAGGLER_GAP = 2 # Row distance between the rearmost hound and the next one that counts as a straggler
+DISTANCE_WEIGHT = 1  # Weight of summed Manhattan distance between hounds and fox (the closer the better)
+LINE_BONUS = 5  # Bonus for each pair of hounds neighboring themselves (keeping close formation is preferred)
+STRAGGLER_PENALTY = (
+    100  # Massive penalty for when ahound is too far from the others (MIN_STRAGGLER_GAP rows or more behind the rest)
+)
+MIN_STRAGGLER_GAP = 2  # Row distance between the rearmost hound and the next one that counts as a straggler
 
 
 class Heuristic(Enum):
@@ -76,7 +78,7 @@ def _mobility(board: Board) -> float:
 def _distance(board: Board) -> float:
     """
     Sum of |dx| + |dy| between each hound and the fox.
-    
+
     Hounds want this small, so the fox benefits from a large value.
     """
     fx, fy = board.fox_pos
@@ -111,11 +113,11 @@ def _straggler(board: Board) -> float:
 # Maps each heuristic to (function, sign). The sign converts the magnitude into
 # the fox's perspective: +1 = good for the fox, -1 = good for the hounds.
 TERMS = {
-    Heuristic.ADVANCEMENT: (_advancement, 1), # fox gains from larger values
-    Heuristic.MOBILITY: (_mobility, 1), # fox gains from larger values
-    Heuristic.DISTANCE: (_distance, 1), # hounds want it small, so large is good for fox
-    Heuristic.LINE: (_line, -1), # a steady hound line is good for the hounds
-    Heuristic.STRAGGLER: (_straggler, 1), # straggler: it is a penalty for the hounds, so fox gains
+    Heuristic.ADVANCEMENT: (_advancement, 1),  # fox gains from larger values
+    Heuristic.MOBILITY: (_mobility, 1),  # fox gains from larger values
+    Heuristic.DISTANCE: (_distance, 1),  # hounds want it small, so large is good for fox
+    Heuristic.LINE: (_line, -1),  # a steady hound line is good for the hounds
+    Heuristic.STRAGGLER: (_straggler, 1),  # straggler: it is a penalty for the hounds, so fox gains
 }
 
 
@@ -143,11 +145,7 @@ class MinimaxPlayer(BasePlayer):
 
     def evaluate(self, board: Board) -> float:
         """Heuristic score of a non-terminal position (fox's perspective)."""
-        return sum(
-            sign * term(board)
-            for h, (term, sign) in TERMS.items()
-            if h in self.heuristics
-        )
+        return sum(sign * term(board) for h, (term, sign) in TERMS.items() if h in self.heuristics)
 
     def _search(self, board: Board, depth: int, alpha: float, beta: float) -> float:
         """
@@ -162,7 +160,7 @@ class MinimaxPlayer(BasePlayer):
 
         # Terminal position: the game is over, no need to look deeper
         if winner := board.get_winner():
-            bonus = WIN_SCORE + depth # Adding depth to prefer quicker wins
+            bonus = WIN_SCORE + depth  # Adding depth to prefer quicker wins
             return bonus if winner == PlayerKind.Fox else -bonus
 
         # Search horizon reached: fall back to the heuristic estimate
@@ -217,9 +215,6 @@ class MinimaxPlayer(BasePlayer):
             raise ValueError("No legal moves available")
 
         # Shown by the UI next to the move
-        self.analysis = (
-            f"Minimax (alpha-beta), depth {self.depth}: "
-            f"value {best_value:g}, {self.nodes} nodes visited."
-        )
+        self.analysis = f"Minimax (alpha-beta), depth {self.depth}: value {best_value:g}, {self.nodes} nodes visited."
         sleep(0.5)
         return best_move
