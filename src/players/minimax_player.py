@@ -28,14 +28,14 @@ from .base_player import BasePlayer
 # Tunable weights
 WIN_SCORE = 10_000 # win/loss score, must be greater than any sum of heuristics
 # Fox
-ADVANCEMENT_WEIGHT = 10 # Points per row the fox has advanced (counting from row 0 where he starts by default)
+ADVANCEMENT_WEIGHT = 5 # Points per row the fox has advanced (counting from row 0 where he starts by default)
 MOBILITY_WEIGHT = 3 # Points per available move (more room to maneuver is preferred)
 LAST_MOVE_PENALTY = 15 # Subtracted when fox has only one move left (close to being trapped)
 # Hounds
 DISTANCE_WEIGHT = 1 # Weight of summed Manhattan distance between hounds and fox (the closer the better)
 LINE_BONUS = 5 # Bonus for each pair of hounds neighboring themselves (keeping close formation is preferred)
-STRAGGLER_PENALTY = 1_000 # Massive penalty for when ahound is too far from the others (more than MAX_ROW_SPREAD rows)
-MAX_ROW_SPREAD = 2 # Largest distance allowed between front and rear hound
+STRAGGLER_PENALTY = 100 # Massive penalty for when ahound is too far from the others (MIN_STRAGGLER_GAP rows or more behind the rest)
+MIN_STRAGGLER_GAP = 2 # Row distance between the rearmost hound and the next one that counts as a straggler
 
 
 class Heuristic(Enum):
@@ -97,14 +97,15 @@ def _line(board: Board) -> float:
     return LINE_BONUS * steady
 
 
-def _straggler(board: Board) -> float: # TODO fix (staircase is pretty good position, should be checking if hound is at least 2 rows further than any other hound (meaning at least 1 row with full gap between them))
-    """Huge penalty when the hounds are spread over more than 2 rows.
+def _straggler(board: Board) -> float:
+    """Huge penalty when one hound is left behind the others.
 
-    Hounds only move down, so the hound left far behind (highest row) leaves a
-    gap the fox can run through.
+    Hounds only move down, so the rearmost hound (highest row) is a straggler
+    when it is at least MIN_STRAGGLER_GAP rows above every other hound, i.e. at
+    least one whole row separates it from the rest. A staircase is fine.
     """
-    rows = [y for _, y in board.hounds_pos]
-    return STRAGGLER_PENALTY if max(rows) - min(rows) > MAX_ROW_SPREAD else 0
+    rows = sorted((y for _, y in board.hounds_pos), reverse=True)
+    return STRAGGLER_PENALTY if rows[0] - rows[1] >= MIN_STRAGGLER_GAP else 0
 
 
 # Maps each heuristic to (function, sign). The sign converts the magnitude into
