@@ -26,9 +26,7 @@ class Board:
         return self.size - 1
 
     def get_winner(self) -> PlayerKind | None:
-        if self.fox_pos[1] == self.edge or all(
-            self.fox_pos[1] > hound_pos[1] for hound_pos in self.hounds_pos
-        ):
+        if self.fox_pos[1] == self.edge or all(self.fox_pos[1] > hound_pos[1] for hound_pos in self.hounds_pos):
             return PlayerKind.Fox
 
         if not self.get_legal_moves():
