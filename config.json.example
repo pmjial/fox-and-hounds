@@ -1,0 +1,6 @@
+{
+  "Local": {
+    "base_url": "http://localhost:9931/v1",
+    "api_key": "."
+  }
+}

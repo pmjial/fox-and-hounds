@@ -4,11 +4,16 @@ from ui import UI
 
 
 def main():
-    # fox = LLMPlayer.load("ChatGPT")
-    # hounds = LLMPlayer.load("ChatGPT")
+    fox = LLMPlayer.load(
+        "Local",
+        # "Qwen3.6-35B-A3B-MTP",
+        "Gemma4-12B-QAT-MTP",
+        # "K2-Horizon-3.7B",
+    )
+
+    hounds = MinimaxPlayer(depth=2)
     # MinimaxPlayer(depth=4, heuristics=[Heuristic.ADVANCEMENT, ...]) selects heuristics
-    fox = MinimaxPlayer(depth=4)
-    hounds = MinimaxPlayer(depth=4)
+
     board = Board(8)
     history: list[tuple[PlayerKind, Move, str | None]] = []
 

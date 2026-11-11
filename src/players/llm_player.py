@@ -20,17 +20,17 @@ class LLMPlayer(BasePlayer):
         self.model_cfg = model_cfg
         super().__init__()
         self.client: OpenAI = OpenAI(
-            base_url=model_cfg.base_url,
-            api_key=model_cfg.api_key,
+            base_url=model_cfg.conn.base_url,
+            api_key=model_cfg.conn.api_key,
         )
         self.timeout: float = timeout
 
     @classmethod
-    def load(cls, name: str, file: str = "config.json") -> Self:
+    def load(cls, conn_name: str, model_name: str, file: str = "config.json") -> Self:
         config = Config.load(file)
-        if not (model_cfg := config.get(name)):
-            raise ValueError(f"No such key {name} in {file}")
-        return cls(model_cfg)
+        if not (conn := config.get(conn_name)):
+            raise ValueError(f"No such key {conn_name} in {file}")
+        return cls(ModelConfig(name=model_name, conn=conn))
 
     @override
     def get_move(self, board: Board) -> Move:
@@ -109,16 +109,17 @@ BOARD:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=self.model_cfg.temperature,
+            temperature=self.model_cfg.conn.temperature,
             response_format={"type": "json_object"},
-            timeout=self.model_cfg.timeout,
+            timeout=self.model_cfg.conn.timeout,
+            reasoning_effort="none",
         )
         if not (raw_content := response.choices[0].message.content):
-            raise ValueError(f"{self.model} returned an invalid message shape")
+            raise ValueError(f"{self.model_cfg.name} returned an invalid message shape")
 
         decision = Decision.model_validate_json(raw_content)
         if not (0 <= decision.move_id <= len(legal_moves)):
-            raise ValueError(f"{self.model} returned an out-of-bounds move_id")
+            raise ValueError(f"{self.model_cfg.name} returned an out-of-bounds move_id")
 
         self.analysis = decision.analysis
         return legal_moves[decision.move_id - 1]
