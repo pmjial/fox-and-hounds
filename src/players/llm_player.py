@@ -21,7 +21,7 @@ class LLMPlayer(BasePlayer):
         super().__init__()
         self.client: OpenAI = OpenAI(
             base_url=model_cfg.conn.base_url,
-            api_key=model_cfg.conn.api_key,
+            api_key=model_cfg.conn.api_key.get_secret_value(),
         )
         self.timeout: float = timeout
 

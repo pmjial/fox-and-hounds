@@ -1,9 +1,9 @@
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, SecretStr, TypeAdapter
 
 
 class ConnectionConfig(BaseModel):
     base_url: str | None = None
-    api_key: str
+    api_key: SecretStr
     temperature: float | None = None
     timeout: float = 120.0
 
