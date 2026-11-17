@@ -1,6 +1,9 @@
 {
+  "OpenAI": {
+    "api_key": "sk-****************"
+  },
   "Local": {
-    "base_url": "http://localhost:9931/v1",
+    "base_url": "http://localhost:9931",
     "api_key": "."
   }
 }
