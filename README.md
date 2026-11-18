@@ -17,6 +17,35 @@ uv sync
 uv run python src/main.py
 ```
 
+## LLM player variants
+
+`LLMPlayer` defaults to direct reasoning with stateless context. The two options are independent, giving four combinations:
+
+| Option | Value | Behavior |
+|---|---|---|
+| `ReasoningMode` | `DIRECT` | Make one request to choose a legal move and provide the UI analysis. |
+| `ReasoningMode` | `ANALYSIS` | First request a separate threat analysis, then make a second request that receives the analysis and chooses the move. This adds an API call per turn. |
+| `ContextMode` | `STATELESS` | Each turn starts with the system prompt and current position only; no earlier turn messages are retained. |
+| `ContextMode` | `CONVERSATION` | Keep that player's prompt/response history across turns. Each turn still includes the full current board and legal moves, plus the last opponent move when available. |
+
+Set either option when constructing or loading the player:
+
+```python
+from players import ContextMode, LLMPlayer, ReasoningMode
+
+# Analysis + conversation; other combinations use the same options independently.
+fox = LLMPlayer.load(
+    "Local",
+    "Gemma4-12B-QAT-MTP",
+    reasoning=ReasoningMode.ANALYSIS,
+    context=ContextMode.CONVERSATION,
+)
+```
+
+Conversation history belongs to one `LLMPlayer` instance. Create a fresh instance for each game to avoid carrying history between matches.
+
+If the provider reports `json_validate_failed`, `LLMPlayer` retries once with a request for shorter, complete JSON. This applies separately to threat analysis and move selection. Move selection shares its single retry between JSON-generation failures and out-of-range move IDs. If the retry fails, the error is surfaced rather than choosing an arbitrary move. Other API errors are not retried by this logic. JSON support and successful generation depend on the provider and model.
+
 ## Minimax player
 
 `MinimaxPlayer` (`src/players/minimax_player.py`) searches the game tree with minimax and alpha-beta pruning

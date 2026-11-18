@@ -5,9 +5,9 @@ from ui import UI
 
 def main():
     fox = LLMPlayer.load(
-        "Local",
+        "Groq-alam",
         # "Qwen3.6-35B-A3B-MTP",
-        "Gemma4-12B-QAT-MTP",
+        "allam-2-7b",
         # "K2-Horizon-3.7B",
     )
 
